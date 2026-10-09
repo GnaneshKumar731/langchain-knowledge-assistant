@@ -1,5 +1,6 @@
 import os
 from glob import glob
+from pathlib import Path
 
 from dotenv import load_dotenv
 
@@ -155,6 +156,40 @@ def ingest_documents(vector_store, chunks):
         vector_store.add_documents(source_chunks)
 
         print(f"Ingested: {source}")
+
+
+def sync_deleted_pdfs(vector_store, documents_folder="documents"):
+    documents_path = Path(documents_folder).resolve()
+
+    # Find PDFs currently present in the documents folder
+    existing_files = {
+        str(file.resolve()).casefold()
+        for file in documents_path.glob("*.pdf")
+    }
+
+    # Get metadata for documents stored in Chroma
+    indexed_data = vector_store.get(include=["metadatas"])
+
+    deleted_sources = set()
+
+    for metadata in indexed_data["metadatas"]:
+        if not metadata:
+            continue
+
+        source = metadata.get("source")
+
+        if not source:
+            continue
+
+        source_path = str(Path(source).resolve()).casefold()
+
+        if source_path not in existing_files:
+            deleted_sources.add(source)
+
+    # Remove all chunks belonging to deleted PDFs
+    for source in deleted_sources:
+        vector_store.delete(where={"source": source})
+        print(f"Removed deleted PDF from Chroma: {source}")
 
 
 def ingest_pdf(file_path, vector_store):

@@ -10,7 +10,7 @@ from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from main import ingest_pdf, initialize_agent
+from main import ingest_pdf, initialize_agent, sync_deleted_pdfs
 
 load_dotenv()
 
@@ -23,6 +23,8 @@ async def lifespan(app):
 
     agent, vector_store = initialize_agent()
 
+    sync_deleted_pdfs(vector_store)
+    
     app.state.agent = agent
     app.state.vector_store = vector_store
 
