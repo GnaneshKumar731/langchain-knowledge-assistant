@@ -147,7 +147,7 @@ langchain-knowledge-assistant/
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-github-repository-url>
+git clone <[your-github-repository-url](https://github.com/GnaneshKumar731/langchain-knowledge-assistant)>
 cd langchain-knowledge-assistant
 ```
 
